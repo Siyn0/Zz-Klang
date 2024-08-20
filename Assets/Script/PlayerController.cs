@@ -21,6 +21,20 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private float attackTime = 0;
 
+    /// <summary>
+    /// 刚刚按过攻击键
+    /// </summary>
+    private bool isAttack = false;
+
+    /// <summary>
+    /// 攻击事件
+    /// </summary>
+    /// <param name="direction">方向 1左 2右</param>
+
+    public delegate void attackEventHandler(int direction);
+
+    public static event attackEventHandler OnAttackEvent;
+
 
     /// <summary>
     /// 加减血
@@ -29,6 +43,11 @@ public class PlayerController : MonoBehaviour
     public void changeHp(int change)
     {
         hp += change;
+        if (hp <= 0)
+        {
+            Debug.Log("You Died！！！");
+            // TODO: 死了显示UI
+        }
     }
 
     // Start is called before the first frame update
@@ -40,16 +59,43 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isAttack)
+        {
+            return;
+        }
 
+        if (Input.GetButtonDown("left"))
+        {
+            Debug.Log("[zzzz]left");
+            if (OnAttackEvent != null)
+            {
+                OnAttackEvent(1);
+                isAttack = true;
+            }
+        }
+
+        if (Input.GetButtonDown("right"))
+        {
+            if (OnAttackEvent != null)
+            {
+                OnAttackEvent(2);
+                isAttack = true;
+            }
+        }
     }
 
 
     private void FixedUpdate()
     {
+        if (!isAttack)
+        {
+            return;
+        }
         attackTime += 0.02f;
         if (attackTime >= Constants.ATTACK_INTERVAL)
         {
             attackTime = 0;
+            isAttack = false;
         }
     }
 }
